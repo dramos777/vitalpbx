@@ -21,7 +21,7 @@ else
 fi
 
 #Install sudo
-apt install sudo -y
+apt install -y sudo --no-install-recommends
 
 #Disable UFW
 if [ -x "$(command -v ufw)" ]; then
@@ -35,7 +35,7 @@ apt -y update
 apt -y clean
 
 #Install curl gpg
-DEBIAN_FRONTEND=noninteractive apt install curl gpg -y
+DEBIAN_FRONTEND=noninteractive apt install -y curl gpg --no-install-recommends
 
 #Update System
 echo -e "${green}Update after setup VPBX Repo...${txtrst}"
@@ -60,7 +60,7 @@ PACKAGES="$PACKAGES php-gd php-mbstring php-json php-imagick php-curl php-ioncub
 # Database
 PACKAGES="$PACKAGES mariadb-server unixodbc odbcinst unixodbc-dev"
 
-DEBIAN_FRONTEND=noninteractive apt install -y $PACKAGES
+DEBIAN_FRONTEND=noninteractive apt install -y $PACKAGES --no-install-recommends
 
 #Web Server Configuration
 if [ "$os_codename" == "bookworm" ]; then
@@ -99,7 +99,7 @@ PACKAGES="asterisk-pbx asterisk-pbx-modules asterisk-pbx-g729 sngrep vitalpbx-as
 PACKAGES="$PACKAGES firewalld fail2ban iptables iptables-persistent"
 PACKAGES="$PACKAGES vitalpbx-i18n vitalpbx-helper vitalpbx-assets vitalpbx-scripts vitalpbx-monitor"
 
-DEBIAN_FRONTEND=noninteractive apt install -y $PACKAGES
+DEBIAN_FRONTEND=noninteractive apt install -y $PACKAGES --no-install-recommends
 
 rebuild-deb.sh
  
@@ -109,13 +109,6 @@ sed -i 's/^FirewallBackend=.*/FirewallBackend=iptables/g' /etc/firewalld/firewal
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 
-#service firewalld start 2>/dev/null
-
-#service fail2ban start
-
-#Disable IPTables to Avoid Conflicts with FirewallD
-#service iptables stop 2>/dev/null
-
 #Fix DNSMASQ
 if [ "$os_codename" == "bookworm" ]; then
 	sed -i 's/^#bind-interfaces/bind-interfaces/g' /etc/dnsmasq.conf
@@ -124,10 +117,6 @@ fi
 #Set Permissions
 chown -R asterisk:asterisk /etc/asterisk /var/lib/asterisk /var/log/asterisk /var/spool/asterisk /usr/lib/asterisk
 chown -R www-data:root /etc/asterisk/vitalpbx
-
-#Running Initial setup
-#echo -e "${green}Running the initial setup...${txtrst}"
-#service vpbx-setup start
 
 #Configure Packages
 dpkg --configure -a

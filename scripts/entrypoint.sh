@@ -1,20 +1,8 @@
 #!/bin/bash
-#set -e
+set -e
 
-green="\033[00;32m"
-red="\033[0;31m"
-txtrst="\033[00;0m"
-
-#service nginx start
-#service fail2ban start
-#service netfilter-persistent start
-#service iptables stop 2>/dev/null
-#service firewalld start
-#
 # Configuração inicial do vitalpbx e inicialização do serviço
 if [ ! -f /var/lib/vitalpbx/dbsetup-done ]; then
-
-  set -e
 
   service mariadb start
   echo "Aguardando MariaDB iniciar..."
@@ -30,12 +18,10 @@ if [ ! -f /var/lib/vitalpbx/dbsetup-done ]; then
   reserved_var_1='configure'
   
   services="mariadb asterisk nginx cron firewalld"
-  #/usr/bin/systemctl daemon-reload >/dev/null 2>&1 || :
   
   case "$reserved_var_1" in
     configure)
-  #    systemctl --quiet --now enable $services || :
-  #    systemctl --quiet enable vpbx-setup.service || :
+	    echo "Initial configuration of VitalPBX detected. Please, wait a moment..."
     ;;
   
     abort-upgrade|abort-remove|abort-deconfigure)
@@ -78,7 +64,6 @@ if [ ! -f /var/lib/vitalpbx/dbsetup-done ]; then
   		# Restart service to apply group changes:
   		service=$username
   		case "$service" in www-data) service=nginx;; esac
-  #		systemctl restart $service.service || :
   	fi
   done
   
@@ -87,8 +72,6 @@ if [ ! -f /var/lib/vitalpbx/dbsetup-done ]; then
   setfacl -Rdm u:asterisk:rwx "$storage_dir"
   setfacl -Rm u:asterisk:rwx "$storage_dir"
   setfacl -Rm g:asterisk:rwx "$storage_dir"
-  # Make happy to asterisk with a full restart
-  #systemctl restart asterisk || :
   
   chown www-data:www-data $www_dir
   chown -R www-data:www-data $www_dir
@@ -138,12 +121,6 @@ if [ ! -f /var/lib/vitalpbx/dbsetup-done ]; then
   
   echo "" > /etc/motd || :
   
-  #Restart CRON
-  #systemctl restart cron || :
-  
-  #Reload Services
-  #systemctl reload nginx || :
-
   touch /var/lib/vitalpbx/dbsetup-done
 
   service mariadb stop

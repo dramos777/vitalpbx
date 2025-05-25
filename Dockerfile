@@ -1,4 +1,4 @@
-FROM debian:bookworm
+FROM debian:bookworm-slim
 
 ## Evita problemas de front-end ao instalar pacotes com systemd
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,24 +16,17 @@ ENV PACKAGES="systemd \
 		cron"
 
 # Instala systemd e serviços desejados
-RUN apt-get update && \
-    apt-get install -y $PACKAGES && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN find /etc/systemd/system \
+RUN apt-get update \
+    && apt-get install -y $PACKAGES \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && find /etc/systemd/system \
     /lib/systemd/system \
     -path '*.wants/*' \
     -not -name '*journald*' \
     -not -name '*systemd-tmpfiles*' \
     -not -name '*systemd-user-sessions*' \
     -print0 | xargs -0 rm -vf
-
-# Permitir que o systemd inicialize corretamente
-VOLUME ["/sys/fs/cgroup"]
-
-# Permite que systemd funcione dentro do container
-STOPSIGNAL SIGRTMIN+3
 
 # Installin VitalPBX Repo
 RUN curl -fsSL https://repo.vitalpbx.com/vitalpbx/v4.5/apt/setup_repo | bash - \
